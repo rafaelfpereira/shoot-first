@@ -1,0 +1,118 @@
+* {
+  font-family: 'Rye';
+  font-weight: 100;
+}
+
+.background {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+
+  width: 100vw;
+  height: 100vh;
+
+  position: relative;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  background-image: linear-gradient(rgb(149, 149, 255), orange );
+}
+
+.chao {
+  height: 20vh;
+  width: 100%;
+  position: absolute;
+  top: 80vh;
+  background-color: #f5da5e;
+}
+
+.player-one {
+  left: 100px;
+}
+
+.player-two {
+  right: 100px;
+}
+
+.boneco-container {
+  position: relative;
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boneco {
+  max-height: 100%;
+  position: absolute;
+  bottom: 20vh;
+}
+
+.atirar {
+  position: absolute;
+  font-size: 90px;
+  bottom: 50%;
+  color: white;
+
+  animation: ani-warning .5s 1;
+}
+
+.timer {
+  font-size: 36px;
+  position: absolute;
+  color: white;
+  left: 50%;
+  top: 10%;
+}
+
+.shot-log {
+  position: absolute;
+  opacity: 0;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 95vw;
+  height: 95vh;
+}
+
+.modal-winner {
+  width: 100vw;
+  height: 100vh;
+
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  background: rgba(0, 0, 0, 0.5)
+}
+
+.winner {
+  font-size: 60px;
+  color: white;
+}
+
+@keyframes ani-warning {
+  0% {
+    transform: (1, 1)
+  }
+
+  50% {
+    transform: scale(1.1, 1.1)
+  }
+
+  100% {
+    transform: scale(1, 1)
+  }
+}
+
+h2, img {
+  pointer-events: none;
+}
