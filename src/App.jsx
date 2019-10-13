@@ -1,46 +1,89 @@
 import React, { Component } from 'react';
-import { Jogador } from './jogador.component';
+import { Player } from './jogador.component';
 import standingSprite from './standing.png';
 import shootingSprite from './shooting.png';
 import themeSong from './theme.mp3';
 import gunshot from './gunshot.mp3';
-
 import './App.css';
+import { ModalWinner } from './modal-winner';
+
+const MIN_TIMER = 2;
+const MAX_TIMER = 20;
 
 class App extends Component {
   constructor() {
     super();
 
+    this.interval = null;
+
+    this.timeToShoot = Math.floor(
+      Math.random() * (MAX_TIMER - MIN_TIMER + 1) + MIN_TIMER
+    );
+
+    this.gunshot = new Audio(gunshot);
+    this.theme = new Audio(themeSong);
+
+    this.state = {
+      warning: null,
+      highNoon: false,
+      highNoonTime: null,
+      timerCount: 0,
+      playerOne: {
+        name: 'playerOne',
+        shotKey: 'f',
+        sprite: standingSprite,
+        reactionTime: 0
+      },
+      playerTwo: {
+        name: 'playerTwo',
+        shotKey: 'j',
+        sprite: standingSprite,
+        reactionTime: 0
+      },
+      winner: null,
+      instructions: false
+    };
+
+    this.startState = this.state;
+  }
+
+  componentDidMount() {
+    this.gameStart();
+    document.addEventListener('keydown', this.shotsFired)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown')
+  }
+
+  gameStart = () => {
+    this.theme.play();
+
     this.interval = setInterval(() => {
       this.runTimer();
       this.openFire();
     }, 1000);
+  };
 
-    this.minTimer = 2;
-    this.maxTimer = 20;
+  gameRestart = () => {
+    this.gameStart();
+    this.setState(this.startState);
+  };
 
-    this.timeToShoot = Math.floor(
-      Math.random() * (this.maxTimer - this.minTimer + 1) + this.minTimer
-    );
+  gameEnd = () => {
+    clearInterval(this.interval);
+    this.theme.pause();
+  };
 
-    this.theme = new Audio(themeSong);
-    this.theme.play();
-    this.gunshot = new Audio(gunshot);
+  getPlayerByValidKeyPressed = key => {
+    if (key === this.state.playerOne.shotKey) {
+      return this.state.playerOne;
+    } else if (key === this.state.playerTwo.shotKey) {
+      return this.state.playerTwo;
+    }
 
-    this.state = {
-      shootTime: null,
-      winner: null,
-      warning: null,
-      highNoon: false,
-      timerCount: 0,
-      spriteP1: standingSprite,
-      spriteP2: standingSprite
-    };
-  }
-
-  componentDidMount() {
-    this.nameInput.focus();
-  }
+    return;
+  };
 
   runTimer = () => {
     let timerCount = this.state.timerCount + 1;
@@ -50,88 +93,72 @@ class App extends Component {
   openFire = () => {
     if (this.state.timerCount === this.timeToShoot) {
       this.setState({
-        shootTime: new Date(),
-        warning: <h1 className='atirar'>SHOOT!</h1>,
-        highNoon: true
+        highNoon: true,
+        highNoonTime: new Date(),
+        warning: <h1 className='high-noon'>SHOOT!</h1>
       });
     }
   };
 
   shotsFired = event => {
-    let reactionP1 = Infinity;
-    let reactionP2 = Infinity;
-
-    this.theme.pause();
-
     if (this.state.winner) {
       return;
     }
 
-    if (!this.state.highNoon) {
-      this.setState(
-        { winner: event.key == 'f' ? 'PLAYER TWO' : 'PLAYER ONE' },
-        () => {
-          this.gunshot.play();
+    const shooter = this.getPlayerByValidKeyPressed(event.key);
 
-          if (this.state.winner === 'PLAYER TWO') {
-            this.setState({ spriteP1: shootingSprite });
-          } else {
-            this.setState({ spriteP2: shootingSprite });
-          }
-        }
-      );
-      return;
-    }
-
-    if (event.key == 'f') {
+    if (shooter) {
+      clearInterval(this.interval)
       this.gunshot.play();
 
-      reactionP1 = new Date().getTime() - this.state.shootTime.getTime();
-      this.setState({ spriteP1: shootingSprite });
-    } else if (event.key == 'j') {
-      this.gunshot.play();
+      if (!this.state.highNoon) {
+        this.setState({
+          [shooter.name]: {
+            ...shooter,
+            sprite: shootingSprite
+          },
+          winner:
+            shooter.name === 'playerOne'
+              ? this.state.playerTwo
+              : this.state.playerOne
+        });
+      } else {
+        const reactionTime = new Date().getTime() - this.state.highNoonTime.getTime();
 
-      reactionP2 = new Date().getTime() - this.state.shootTime.getTime();
-      this.setState({ spriteP2: shootingSprite });
-    } else {
-      return;
-    }
-
-    if (reactionP1 < reactionP2) {
-      this.setState({ winner: 'PLAYER ONE' });
-    } else {
-      this.setState({ winner: 'PLAYER TWO' });
+        this.setState({
+          [shooter.name]: {
+            ...shooter,
+            reactionTime,
+            sprite: shootingSprite
+          },
+          winner: {...shooter, reactionTime}
+        });
+      }
     }
   };
 
-  render() {
-    let modal;
-
-    if (this.state.winner) {
-      clearInterval(this.interval);
-      modal = (
-        <div className='modal-winner'>
-          <h1 className='winner'>{this.state.winner} WINS!</h1>
-        </div>
-      );
-    }
-
+  renderGame() {
     return (
-      <div className='background'>
-        {modal}
-        <input
-          type='text'
-          className='shot-log'
-          onKeyDown={this.shotsFired}
-          ref={input => {
-            this.nameInput = input;
-          }}
-        />
+      <>
+        {this.state.winner && (
+          <ModalWinner winner={this.state.winner} restart={this.gameRestart} />
+          )}
+
         <h2 className='timer'>{this.state.timerCount}</h2>
-        <Jogador sprite={this.state.spriteP1} />
-        <Jogador sprite={this.state.spriteP2} flipped={this.state.spriteP2} />
+        <Player sprite={this.state.playerOne.sprite} />
+        <Player sprite={this.state.playerTwo.sprite} flipped />
         {this.state.warning}
         <div className='chao' />
+      </>
+    )
+  }
+
+  render() {
+    return (
+      <div className='background'>
+        {/* <ModalInstructions /> */}
+        {this.state.instructions ? '' : this.renderGame()}
+        
       </div>
     );
   }

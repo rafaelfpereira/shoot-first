@@ -1,18 +1,13 @@
 import React, { Component } from 'react';
 
-export class Jogador extends Component {
+export class Player extends Component {
   render() {
-    if (this.props.flipped) {
-      return (
-        <img
-          src={this.props.sprite}
-          alt='#'
-          className='boneco player-two'
-          style={{ transform: 'scaleX(-1)' }}
-        />
-      );
-    }
-
-    return <img src={this.props.sprite} alt='#' className='boneco player-one' />;
+    return (
+      <img
+        className={`dude ${this.props.flipped ? 'player-two' : 'player-one'}`}
+        src={this.props.sprite}
+        alt='player sprite'
+      />
+    );
   }
 }

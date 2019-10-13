@@ -28,35 +28,20 @@
   background-color: #f5da5e;
 }
 
+
+.dude {
+  max-height: 100%;
+  position: absolute;
+  bottom: 20vh;
+}
+
 .player-one {
   left: 100px;
 }
 
 .player-two {
   right: 100px;
-}
-
-.boneco-container {
-  position: relative;
-  
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.boneco {
-  max-height: 100%;
-  position: absolute;
-  bottom: 20vh;
-}
-
-.atirar {
-  position: absolute;
-  font-size: 90px;
-  bottom: 50%;
-  color: white;
-
-  animation: ani-warning .5s 1;
+  transform: scaleX(-1)
 }
 
 .timer {
@@ -78,25 +63,13 @@
   height: 95vh;
 }
 
-.modal-winner {
-  width: 100vw;
-  height: 100vh;
-
-  z-index: 2;
+.high-noon {
   position: absolute;
-  top: 0;
-  left: 0;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  background: rgba(0, 0, 0, 0.5)
-}
-
-.winner {
-  font-size: 60px;
+  font-size: 90px;
+  bottom: 50%;
   color: white;
+
+  animation: ani-warning .5s 1;
 }
 
 @keyframes ani-warning {
