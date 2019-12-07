@@ -1,0 +1,15 @@
+
+.dude {
+  max-height: 100%;
+  position: absolute;
+  bottom: 20vh;
+}
+
+.player-one {
+  left: 100px;
+}
+
+.player-two {
+  right: 100px;
+  transform: scaleX(-1)
+}

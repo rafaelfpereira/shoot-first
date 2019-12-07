@@ -1,27 +1,25 @@
-import React, { Component } from 'react';
-import { Player } from './jogador.component';
-import standingSprite from './standing.png';
-import shootingSprite from './shooting.png';
-import themeSong from './theme.mp3';
-import gunshot from './gunshot.mp3';
-import './App.css';
-import { ModalWinner } from './modal-winner';
+import React, { Component } from 'react'
+import { standing, shooting } from './assets/sprites'
+import { gunshot, theme } from './assets/audio'
+import { ModalWinner } from './modal-winner'
+import { Background, Player } from './components'
+import './App.css'
 
-const MIN_TIMER = 2;
-const MAX_TIMER = 20;
+const MIN_TIMER = 2
+const MAX_TIMER = 20
 
 class App extends Component {
   constructor() {
-    super();
+    super()
 
-    this.interval = null;
+    this.interval = null
 
     this.timeToShoot = Math.floor(
       Math.random() * (MAX_TIMER - MIN_TIMER + 1) + MIN_TIMER
-    );
+    )
 
-    this.gunshot = new Audio(gunshot);
-    this.theme = new Audio(themeSong);
+    this.gunshot = new Audio(gunshot)
+    this.theme = new Audio(theme)
 
     this.state = {
       warning: null,
@@ -31,24 +29,24 @@ class App extends Component {
       playerOne: {
         name: 'playerOne',
         shotKey: 'f',
-        sprite: standingSprite,
+        sprite: standing,
         reactionTime: 0
       },
       playerTwo: {
         name: 'playerTwo',
         shotKey: 'j',
-        sprite: standingSprite,
+        sprite: standing,
         reactionTime: 0
       },
       winner: null,
       instructions: false
-    };
+    }
 
-    this.startState = this.state;
+    this.startState = this.state
   }
 
   componentDidMount() {
-    this.gameStart();
+    this.gameStart()
     document.addEventListener('keydown', this.shotsFired)
   }
 
@@ -57,38 +55,38 @@ class App extends Component {
   }
 
   gameStart = () => {
-    this.theme.play();
+    this.theme.play()
 
     this.interval = setInterval(() => {
-      this.runTimer();
-      this.openFire();
-    }, 1000);
-  };
+      this.runTimer()
+      this.openFire()
+    }, 1000)
+  }
 
   gameRestart = () => {
-    this.gameStart();
-    this.setState(this.startState);
-  };
+    this.gameStart()
+    this.setState(this.startState)
+  }
 
   gameEnd = () => {
-    clearInterval(this.interval);
-    this.theme.pause();
-  };
+    clearInterval(this.interval)
+    this.theme.pause()
+  }
 
   getPlayerByValidKeyPressed = key => {
     if (key === this.state.playerOne.shotKey) {
-      return this.state.playerOne;
+      return this.state.playerOne
     } else if (key === this.state.playerTwo.shotKey) {
-      return this.state.playerTwo;
+      return this.state.playerTwo
     }
 
-    return;
-  };
+    return
+  }
 
   runTimer = () => {
-    let timerCount = this.state.timerCount + 1;
-    this.setState({ timerCount });
-  };
+    let timerCount = this.state.timerCount + 1
+    this.setState({ timerCount })
+  }
 
   openFire = () => {
     if (this.state.timerCount === this.timeToShoot) {
@@ -96,72 +94,73 @@ class App extends Component {
         highNoon: true,
         highNoonTime: new Date(),
         warning: <h1 className='high-noon'>SHOOT!</h1>
-      });
+      })
     }
-  };
+  }
 
   shotsFired = event => {
     if (this.state.winner) {
-      return;
+      return
     }
 
-    const shooter = this.getPlayerByValidKeyPressed(event.key);
+    const shooter = this.getPlayerByValidKeyPressed(event.key)
 
     if (shooter) {
       clearInterval(this.interval)
-      this.gunshot.play();
+      this.theme.pause()
+      this.gunshot.play()
 
       if (!this.state.highNoon) {
         this.setState({
           [shooter.name]: {
             ...shooter,
-            sprite: shootingSprite
+            sprite: shooting
           },
           winner:
             shooter.name === 'playerOne'
               ? this.state.playerTwo
               : this.state.playerOne
-        });
+        })
       } else {
-        const reactionTime = new Date().getTime() - this.state.highNoonTime.getTime();
+        const reactionTime =
+          new Date().getTime() - this.state.highNoonTime.getTime()
 
         this.setState({
           [shooter.name]: {
             ...shooter,
             reactionTime,
-            sprite: shootingSprite
+            sprite: shooting
           },
-          winner: {...shooter, reactionTime}
-        });
+          winner: { ...shooter, reactionTime }
+        })
       }
     }
-  };
+  }
 
   renderGame() {
     return (
-      <>
+      <Background>
         {this.state.winner && (
           <ModalWinner winner={this.state.winner} restart={this.gameRestart} />
-          )}
+        )}
 
         <h2 className='timer'>{this.state.timerCount}</h2>
         <Player sprite={this.state.playerOne.sprite} />
         <Player sprite={this.state.playerTwo.sprite} flipped />
         {this.state.warning}
         <div className='chao' />
-      </>
+      </Background>
     )
   }
 
   render() {
     return (
-      <div className='background'>
+      <>
         {/* <ModalInstructions /> */}
         {this.state.instructions ? '' : this.renderGame()}
-        
-      </div>
-    );
+      </>
+    )
   }
 }
 
-export default App;
+export default App
